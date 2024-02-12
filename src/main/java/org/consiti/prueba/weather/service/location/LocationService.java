@@ -1,10 +1,6 @@
-package org.consiti.prueba.weather.service;
+package org.consiti.prueba.weather.service.location;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import org.consiti.prueba.weather.model.input.LocationModel;
+import org.consiti.prueba.weather.model.input.location.LocationModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,10 +10,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 @Service
-@Getter
-@Setter
-@AllArgsConstructor
-@NoArgsConstructor
 public class LocationService {
     private static final Logger logger = LoggerFactory.getLogger(LocationService.class);
 
@@ -27,8 +19,8 @@ public class LocationService {
     @Autowired
     private RestTemplate restTemplate;
 
-    public LocationModel getLocation(String city) {
-        String url = this.apiUrl + city + "&format=json";
+    public LocationModel getLocation(String city, String apiKey) {
+        String url = this.apiUrl + city + "&limit=1&appid=" + apiKey;
         ResponseEntity<LocationModel[]> response = this.restTemplate.getForEntity(url, LocationModel[].class);
         LocationModel[] locations = response.getBody();
         if (locations != null && locations.length > 0) {

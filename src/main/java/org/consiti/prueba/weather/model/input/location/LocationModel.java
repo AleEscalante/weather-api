@@ -1,4 +1,4 @@
-package org.consiti.prueba.weather.model.input;
+package org.consiti.prueba.weather.model.input.location;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
