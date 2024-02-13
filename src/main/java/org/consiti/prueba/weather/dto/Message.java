@@ -7,6 +7,6 @@ import lombok.Setter;
 @AllArgsConstructor
 @Setter
 @Getter
-public class Mensaje {
+public class Message {
     private String mensaje;
 }

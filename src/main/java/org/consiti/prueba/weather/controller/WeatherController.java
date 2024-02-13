@@ -1,11 +1,10 @@
 package org.consiti.prueba.weather.controller;
 
-import org.consiti.prueba.weather.dto.Mensaje;
+import org.consiti.prueba.weather.dto.Message;
 import org.consiti.prueba.weather.model.input.location.LocationModel;
 import org.consiti.prueba.weather.model.input.weather.current.WeatherInfoModel;
 import org.consiti.prueba.weather.model.input.weather.forecast.ForecastModel;
 import org.consiti.prueba.weather.model.input.weather.pollution.AirPollutionModel;
-import org.consiti.prueba.weather.model.response.forecast.CustomCityModel;
 import org.consiti.prueba.weather.model.response.forecast.CustomForecastModel;
 import org.consiti.prueba.weather.model.response.pollution.CustomPollutionInfoModel;
 import org.consiti.prueba.weather.model.response.weather.CustomWeatherResponse;
@@ -37,7 +36,7 @@ public class WeatherController {
     public ResponseEntity<?> getWeather(@PathVariable("city") String city) {
         LocationModel location = locationService.getLocation(city, apiKey);
         if (location == null) {
-            return new ResponseEntity<>(new Mensaje("La ciudad solicitada no existe"), HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(new Message("La ciudad solicitada no existe"), HttpStatus.NOT_FOUND);
         } else {
             WeatherInfoModel weatherInfoResponse = this.weatherInfoService.getWeatherCurrent(location.lat(), location.lon(), this.apiKey);
             CustomWeatherResponse customResponse = this.weatherInfoService.transformToCustomWeatherResponse(weatherInfoResponse);
@@ -50,7 +49,7 @@ public class WeatherController {
     public ResponseEntity<?> getForecast(@PathVariable("city") String city) {
         LocationModel location = locationService.getLocation(city, apiKey);
         if (location == null) {
-            return new ResponseEntity<>(new Mensaje("La ciudad solicitada no existe"), HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(new Message("La ciudad solicitada no existe"), HttpStatus.NOT_FOUND);
         } else {
             ForecastModel forecastResponse = this.weatherInfoService.getForecast(location.lat(), location.lon(), this.apiKey);
             CustomForecastModel customResponse = this.weatherInfoService.transformToCustomForecastResponse(forecastResponse);
@@ -63,7 +62,7 @@ public class WeatherController {
     public ResponseEntity<?> getAirPollution(@PathVariable("city") String city) {
         LocationModel location = locationService.getLocation(city, apiKey);
         if (location == null) {
-            return new ResponseEntity<>(new Mensaje("La ciudad solicitada no existe"), HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(new Message("La ciudad solicitada no existe"), HttpStatus.NOT_FOUND);
         } else {
             AirPollutionModel airPollutionResponse = this.weatherInfoService.getAirPollution(location.lat(), location.lon(), this.apiKey);
             CustomPollutionInfoModel customResponse = this.weatherInfoService.transformToCustomPollutionResponse(airPollutionResponse);
