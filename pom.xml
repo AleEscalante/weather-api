@@ -90,9 +90,9 @@
             <scope>runtime</scope>
         </dependency>
         <dependency>
-            <groupId>com.bucket4j</groupId>
+            <groupId>com.github.vladimir-bukhtoyarov</groupId>
             <artifactId>bucket4j-core</artifactId>
-            <version>8.7.0</version>
+            <version>7.6.0</version>
         </dependency>
         <dependency>
             <groupId>org.springdoc</groupId>
@@ -116,6 +116,11 @@
             <groupId>com.nimbusds</groupId>
             <artifactId>nimbus-jose-jwt</artifactId>
             <version>9.30.2</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>32.0.1-jre</version>
         </dependency>
     </dependencies>
 

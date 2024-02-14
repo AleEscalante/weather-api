@@ -2,6 +2,7 @@ package org.consiti.prueba.weather.service;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
+import org.consiti.prueba.weather.configuration.CacheStore;
 import org.consiti.prueba.weather.model.input.weather.current.WeatherInfoModel;
 import org.consiti.prueba.weather.model.input.weather.forecast.ForecastModel;
 import org.consiti.prueba.weather.model.input.weather.pollution.AirPollutionModel;
@@ -125,5 +126,17 @@ public class WeatherInfoService {
             return bearerToken.replace("Bearer ", "");
         }
         return null;
+    }
+
+    public Record loadCache(String city, String apiKey, WeatherInfoService weatherInfoService,
+                            HttpServletRequest request, UserService userService,
+                            CacheStore<Record> userCacheStore, QueryType queryType) {
+        String keyCache = getKeyCache(queryType, city, apiKey,
+                weatherInfoService.getUser(weatherInfoService.getTokenFromRequest(request), userService).getUsername());
+        return userCacheStore.get(keyCache);
+    }
+
+    public String getKeyCache(QueryType queryType, String city, String apiKey, String username) {
+        return queryType + city + apiKey + username;
     }
 }

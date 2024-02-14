@@ -31,7 +31,6 @@ public class AuthController {
     @Autowired
     UserService userService;
 
-
     @PostMapping("/sign-up")
     public ResponseEntity<Message> nuevo(@Valid @RequestBody NewUser newUser, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
@@ -43,13 +42,12 @@ public class AuthController {
         if (userService.existsByEmail(newUser.getEmail())) {
             return new ResponseEntity<>(new Message("El email " + newUser.getEmail() + " ya se encuentra registrado"), HttpStatus.BAD_REQUEST);
         }
-        User usuario = new User(
+        User user = new User(
                 newUser.getName(),
                 newUser.getUsername(),
                 newUser.getEmail(),
                 passwordEncoder.encode(newUser.getPassword()));
-
-        userService.save(usuario);
+        userService.save(user);
         return new ResponseEntity<>(new Message("Usuario registrado con exito"), HttpStatus.CREATED);
     }
 
