@@ -6,6 +6,7 @@ import org.consiti.prueba.weather.security.dto.JwtDto;
 import org.consiti.prueba.weather.security.dto.NewUser;
 import org.consiti.prueba.weather.security.entity.User;
 import org.consiti.prueba.weather.security.service.UserService;
+import org.consiti.prueba.weather.security.util.AuthCredentials;
 import org.consiti.prueba.weather.security.util.TokenUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -50,6 +51,11 @@ public class AuthController {
 
         userService.save(usuario);
         return new ResponseEntity<>(new Message("Usuario registrado con exito"), HttpStatus.CREATED);
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<?> authenticateUser(@RequestBody AuthCredentials credentials) {
+        return ResponseEntity.ok().build();
     }
 
     @PostMapping("/refresh")

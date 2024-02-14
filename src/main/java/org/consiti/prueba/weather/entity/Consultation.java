@@ -2,6 +2,7 @@ package org.consiti.prueba.weather.entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -9,6 +10,7 @@ import lombok.Setter;
 import org.consiti.prueba.weather.security.entity.User;
 import org.consiti.prueba.weather.security.enums.QueryType;
 
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
 
 @Entity
@@ -26,12 +28,12 @@ public class Consultation {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @NotBlank
+    @NotNull
     @Column(nullable = false)
-    private LocalDateTime timestamp;
+    private Timestamp timestamp;
 
     @Enumerated(EnumType.STRING)
-    @NotBlank
+    @NotNull
     @Column(nullable = false)
     private QueryType queryType;
 
@@ -40,6 +42,18 @@ public class Consultation {
     private String requestLink;
 
     @NotBlank
-    @Column(columnDefinition = "JSON", nullable = false)
+    @Column(columnDefinition = "TEXT", nullable = false)
     private String responseJson;
+
+    public Consultation(User user,
+                        Timestamp timestamp,
+                        QueryType queryType,
+                        String requestLink,
+                        String responseJson) {
+        this.user = user;
+        this.timestamp = timestamp;
+        this.queryType = queryType;
+        this.requestLink = requestLink;
+        this.responseJson = responseJson;
+    }
 }

@@ -1,7 +1,6 @@
 package org.consiti.prueba.weather.security.entity;
 
 import lombok.AllArgsConstructor;
-import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 

@@ -1,4 +1,4 @@
-package org.consiti.prueba.weather.service.location;
+package org.consiti.prueba.weather.service;
 
 import org.consiti.prueba.weather.model.input.location.LocationModel;
 import org.slf4j.Logger;

@@ -6,24 +6,30 @@ import com.nimbusds.jwt.JWTParser;
 import io.jsonwebtoken.Jwts;
 
 import java.text.ParseException;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import org.consiti.prueba.weather.security.dto.JwtDto;
+import org.consiti.prueba.weather.security.entity.User;
+import org.consiti.prueba.weather.security.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 
 public class TokenUtils {
     private static final String SECRET = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkFsZWphbmRybyIsImlhdCI6MTUxNjIzOTAyMn0.t74JoOr2rkmMDi-DcnDuPexfZ8wEXIU3W-tvmgsbAyA";
 
-    private static final Long TOKEN_EXPIRATION = 60L; // 60 seg
+    private static final Long TOKEN_EXPIRATION = 300L; // 5 min
 
     private static final Logger log = LoggerFactory.getLogger(TokenUtils.class);
+
+    UserService userService;
+
+    public TokenUtils(UserService userService) {
+        this.userService = userService;
+    }
 
     public static String createToken(String username, String email) {
         long expirationTime = TOKEN_EXPIRATION * 1_000;
@@ -85,6 +91,19 @@ public class TokenUtils {
                     .compact();
         }
 
+        return null;
+    }
+
+    public User getUserFromToken(JwtDto jwtDto) throws ParseException {
+        JWT jwt = JWTParser.parse(jwtDto.getToken());
+        JWTClaimsSet claims = jwt.getJWTClaimsSet();
+        String email = claims.getSubject();
+
+        User user = userService.getUserByEmail(email);
+        if (user != null) {
+            log.info("User: " + user);
+            return user;
+        }
         return null;
     }
 }

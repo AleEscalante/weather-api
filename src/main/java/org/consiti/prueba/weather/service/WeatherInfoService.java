@@ -1,5 +1,7 @@
-package org.consiti.prueba.weather.service.weather;
+package org.consiti.prueba.weather.service;
 
+import jakarta.servlet.http.HttpServletRequest;
+import lombok.extern.slf4j.Slf4j;
 import org.consiti.prueba.weather.model.input.weather.current.WeatherInfoModel;
 import org.consiti.prueba.weather.model.input.weather.forecast.ForecastModel;
 import org.consiti.prueba.weather.model.input.weather.pollution.AirPollutionModel;
@@ -7,16 +9,23 @@ import org.consiti.prueba.weather.model.response.forecast.CustomCityModel;
 import org.consiti.prueba.weather.model.response.forecast.CustomForecastModel;
 import org.consiti.prueba.weather.model.response.pollution.CustomPollutionInfoModel;
 import org.consiti.prueba.weather.model.response.weather.CustomWeatherResponse;
+import org.consiti.prueba.weather.security.dto.JwtDto;
+import org.consiti.prueba.weather.security.entity.User;
+import org.consiti.prueba.weather.security.enums.QueryType;
+import org.consiti.prueba.weather.security.service.UserService;
+import org.consiti.prueba.weather.security.util.TokenUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
 @Service
+@Slf4j
 public class WeatherInfoService {
 
     @Value("${weather.weather-api-url}")
@@ -90,5 +99,31 @@ public class WeatherInfoService {
                 airPollutionResponse.list().get(0).main().aqi(),
                 airPollutionResponse.list().get(0).components()
         );
+    }
+
+    // Utils
+    public String getUrl(QueryType queryType, String lat, String lon, String key) {
+        return switch (queryType) {
+            case CURRENT_WEATHER -> this.apiCurrentWeatherUrl + lat + "&lon=" + lon + "&appid=" + key + "&units=metric";
+            case FORECAST -> this.apiForecastUrl + lat + "&lon=" + lon + "&appid=" + key + "&units=metric";
+            case POLLUTION -> this.apiAirPollutionUrl + lat + "&lon=" + lon + "&appid=" + key + "&units=metric";
+        };
+    }
+
+    public User getUser(String token, UserService userService) {
+        try {
+            return new TokenUtils(userService).getUserFromToken(new JwtDto(token));
+        } catch (ParseException e) {
+            log.error("Token invalid");
+            return null;
+        }
+    }
+
+    public String getTokenFromRequest(HttpServletRequest request) {
+        String bearerToken = request.getHeader("Authorization");
+        if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
+            return bearerToken.replace("Bearer ", "");
+        }
+        return null;
     }
 }

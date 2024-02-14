@@ -1,4 +1,4 @@
-package org.consiti.prueba.weather.security.config;
+package org.consiti.prueba.weather.security;
 
 import lombok.AllArgsConstructor;
 import org.consiti.prueba.weather.security.jwt.JWTAuthenticationFilter;
@@ -32,11 +32,15 @@ public class WebSecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(authRequest
                         -> authRequest.requestMatchers(
-                                "/swagger-ui/*",
-                                "/v3/api-docs/",
+                                "/v2/api-docs",
+                                "/swagger-resources",
+                                "/swagger-resources/**",
+                                "/configuration/ui",
+                                "/configuration/security",
                                 "/swagger-ui.html",
-                                "/swagger-ui/",
-                                "/webjars/*",
+                                "/webjars/**",
+                                "/v3/api-docs/**",
+                                "/swagger-ui/**",
                                 "/auth/sign-up").permitAll()
                         .anyRequest().authenticated()
                 )
