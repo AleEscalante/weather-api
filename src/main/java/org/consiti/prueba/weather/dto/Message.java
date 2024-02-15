@@ -9,4 +9,11 @@ import lombok.Setter;
 @Getter
 public class Message {
     private String message;
+
+    @Override
+    public String toString() {
+        return "Message[" +
+                "message=" + message +
+                ']';
+    }
 }

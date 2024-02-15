@@ -1,0 +1,31 @@
+version: '3.8'
+networks:
+  api-network:
+    driver: bridge
+
+services:
+  mysql_db:
+    image: mysql:latest
+    restart: unless-stopped
+    container_name: mysql-container
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: consultationaudits
+    networks:
+      - api-network
+
+  app_api:
+    build: .
+    restart: on-failure
+    container_name: myapp-container
+    depends_on:
+      - mysql_db
+    environment:
+      MYSQL_HOST: mysql_db
+      MYSQL_DATABASE: consultationaudits
+      MYSQL_USER: root
+      MYSQL_PASSWORD: root
+    ports:
+      - "8080:8080"
+    networks:
+      - api-network

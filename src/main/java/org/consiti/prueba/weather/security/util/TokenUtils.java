@@ -17,7 +17,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
+@Service
 public class TokenUtils {
     private static final String SECRET = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkFsZWphbmRybyIsImlhdCI6MTUxNjIzOTAyMn0.t74JoOr2rkmMDi-DcnDuPexfZ8wEXIU3W-tvmgsbAyA";
 
@@ -25,11 +28,6 @@ public class TokenUtils {
 
     private static final Logger log = LoggerFactory.getLogger(TokenUtils.class);
 
-    UserService userService;
-
-    public TokenUtils(UserService userService) {
-        this.userService = userService;
-    }
 
     public static String createToken(String username, String email) {
         long expirationTime = TOKEN_EXPIRATION * 1_000;
@@ -91,19 +89,6 @@ public class TokenUtils {
                     .compact();
         }
 
-        return null;
-    }
-
-    public User getUserFromToken(JwtDto jwtDto) throws ParseException {
-        JWT jwt = JWTParser.parse(jwtDto.getToken());
-        JWTClaimsSet claims = jwt.getJWTClaimsSet();
-        String email = claims.getSubject();
-
-        User user = userService.getUserByEmail(email);
-        if (user != null) {
-            log.info("User: " + user);
-            return user;
-        }
         return null;
     }
 }

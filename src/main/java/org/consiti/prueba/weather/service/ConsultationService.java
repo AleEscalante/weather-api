@@ -1,6 +1,7 @@
 package org.consiti.prueba.weather.service;
 
 import jakarta.servlet.http.HttpServletRequest;
+import org.consiti.prueba.weather.dto.Message;
 import org.consiti.prueba.weather.entity.Consultation;
 import org.consiti.prueba.weather.model.input.location.LocationModel;
 import org.consiti.prueba.weather.repository.ConsultationRepository;
@@ -26,20 +27,7 @@ public class ConsultationService {
         return consultationRepository.findByUser(user);
     }
 
-    public void save(
-            WeatherInfoService weatherInfoService,
-            HttpServletRequest request,
-            QueryType queryType,
-            UserService userService,
-            LocationModel location,
-            String apiKey,
-            Record customResponse) {
-        Consultation consultation = new Consultation(
-                weatherInfoService.getUser(weatherInfoService.getTokenFromRequest(request), userService),
-                new Timestamp(new Date().getTime()),
-                queryType,
-                weatherInfoService.getUrl(QueryType.CURRENT_WEATHER, location.lat(), location.lon(), apiKey),
-                customResponse.toString());
+    public void save(Consultation consultation) {
         consultationRepository.save(consultation);
     }
 
