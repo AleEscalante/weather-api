@@ -64,8 +64,7 @@ public class WeatherController {
     @GetMapping("/current-weather/{city}")
     public ResponseEntity<?> getWeather(@PathVariable("city") String city, HttpServletRequest request) {
         LocationModel location = locationService.getLocation(city, apiKey);
-        String keyCache = this.getKeyCache(QueryType.CURRENT_WEATHER,
-                city, apiKey, this.getUser(this.getTokenFromRequest(request)).getUsername());
+        String keyCache = this.getKeyCache(QueryType.CURRENT_WEATHER, city);
         if (location == null) {
             Message message = new Message("City not found");
             Consultation consultation = new Consultation(
@@ -77,8 +76,7 @@ public class WeatherController {
             consultationService.save(consultation);
             return new ResponseEntity<>(message, HttpStatus.NOT_FOUND);
         } else {
-            Record userQueryCache = this.loadCache(city, apiKey, request, userService,
-                    userCacheStore, QueryType.CURRENT_WEATHER);
+            Record userQueryCache = this.loadCache(city, userCacheStore, QueryType.CURRENT_WEATHER);
             if (userQueryCache != null) {
                 log.info("Query found in cache with key: " + keyCache);
                 Consultation consultation = new Consultation(
@@ -109,8 +107,7 @@ public class WeatherController {
     @GetMapping("/forecast/{city}")
     public ResponseEntity<?> getForecast(@PathVariable("city") String city, HttpServletRequest request) {
         LocationModel location = locationService.getLocation(city, apiKey);
-        String keyCache = this.getKeyCache(QueryType.FORECAST,
-                city, apiKey, this.getUser(this.getTokenFromRequest(request)).getUsername());
+        String keyCache = this.getKeyCache(QueryType.FORECAST, city);
         if (location == null) {
             Message message = new Message("City not found");
             Consultation consultation = new Consultation(
@@ -122,8 +119,7 @@ public class WeatherController {
             consultationService.save(consultation);
             return new ResponseEntity<>(message, HttpStatus.NOT_FOUND);
         } else {
-            Record userQueryCache = this.loadCache(city, apiKey, request, userService,
-                    userCacheStore, QueryType.FORECAST);
+            Record userQueryCache = this.loadCache(city, userCacheStore, QueryType.FORECAST);
             if (userQueryCache != null) {
                 log.info("Query found in cache with key: " + keyCache);
                 Consultation consultation = new Consultation(
@@ -154,8 +150,7 @@ public class WeatherController {
     @GetMapping("/air-pollution/{city}")
     public ResponseEntity<?> getAirPollution(@PathVariable("city") String city, HttpServletRequest request) {
         LocationModel location = locationService.getLocation(city, apiKey);
-        String keyCache = this.getKeyCache(QueryType.POLLUTION,
-                city, apiKey, this.getUser(this.getTokenFromRequest(request)).getUsername());
+        String keyCache = this.getKeyCache(QueryType.POLLUTION, city);
         if (location == null) {
             Message message = new Message("City not found");
             Consultation consultation = new Consultation(
@@ -167,8 +162,7 @@ public class WeatherController {
             consultationService.save(consultation);
             return new ResponseEntity<>(message, HttpStatus.NOT_FOUND);
         } else {
-            Record userQueryCache = this.loadCache(city, apiKey, request, userService,
-                    userCacheStore, QueryType.POLLUTION);
+            Record userQueryCache = this.loadCache(city, userCacheStore, QueryType.POLLUTION);
             if (userQueryCache != null) {
                 log.info("Query found in cache with key: " + keyCache);
                 Consultation consultation = new Consultation(
@@ -196,14 +190,12 @@ public class WeatherController {
         }
     }
 
-    public String getKeyCache(QueryType queryType, String city, String apiKey, String username) {
-        return queryType + city + apiKey + username;
+    public String getKeyCache(QueryType queryType, String city) {
+        return queryType + city;
     }
 
-    public Record loadCache(String city, String apiKey, HttpServletRequest request, UserService userService,
-                            CacheStore<Record> userCacheStore, QueryType queryType) {
-        String keyCache = getKeyCache(queryType, city, apiKey,
-                this.getUser(this.getTokenFromRequest(request)).getUsername());
+    public Record loadCache(String city, CacheStore<Record> userCacheStore, QueryType queryType) {
+        String keyCache = getKeyCache(queryType, city);
         return userCacheStore.get(keyCache);
     }
 
@@ -218,7 +210,8 @@ public class WeatherController {
 
     public String getUrl(QueryType queryType, String lat, String lon) {
         return switch (queryType) {
-            case CURRENT_WEATHER -> this.apiCurrentWeatherUrl + lat + "&lon=" + lon + "&appid=" + this.apiKey + "&units=metric";
+            case CURRENT_WEATHER ->
+                    this.apiCurrentWeatherUrl + lat + "&lon=" + lon + "&appid=" + this.apiKey + "&units=metric";
             case FORECAST -> this.apiForecastUrl + lat + "&lon=" + lon + "&appid=" + this.apiKey + "&units=metric";
             case POLLUTION -> this.apiAirPollutionUrl + lat + "&lon=" + lon + "&appid=" + this.apiKey + "&units=metric";
         };

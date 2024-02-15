@@ -7,6 +7,7 @@ import com.nimbusds.jwt.JWT;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.JWTParser;
 import jakarta.servlet.*;
+import jakarta.servlet.annotation.WebFilter;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
@@ -17,8 +18,9 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.util.concurrent.TimeUnit;
 
-@Component
+@WebFilter(urlPatterns = {"/*"}, dispatcherTypes = {DispatcherType.REQUEST, DispatcherType.FORWARD})
 @Slf4j
+@Component
 public class RequestThrottleFilter implements Filter {
 
     private int MAX_REQUESTS = 3;
@@ -48,13 +50,33 @@ public class RequestThrottleFilter implements Filter {
             throws IOException, ServletException {
         HttpServletRequest httpServletRequest = (HttpServletRequest) servletRequest;
         HttpServletResponse httpServletResponse = (HttpServletResponse) servletResponse;
-        String email = getEmail(httpServletRequest);
-        if (isMaximumRequestsPerMinuteExceeded(email)) {
-            log.warn("LIMITE SOBREPASADO");
-            httpServletResponse.setStatus(HttpStatus.TOO_MANY_REQUESTS.value());
-            httpServletResponse.getWriter().write("TOO MANY REQUESTS");
+        String requestURI = httpServletRequest.getRequestURI();
+        if (requestURI.startsWith("/swagger") ||
+                requestURI.startsWith("/v2/api-docs") ||
+                requestURI.startsWith("/swagger-resources") ||
+                requestURI.startsWith("/configuration/ui") ||
+                requestURI.startsWith("/configuration/security") ||
+                requestURI.startsWith("/swagger-ui.html") ||
+                requestURI.startsWith("/webjars") ||
+                requestURI.startsWith("/v3/api-docs") ||
+                requestURI.startsWith("/swagger-ui") ||
+                requestURI.startsWith("/auth/sign-up")) {
+            filterChain.doFilter(servletRequest, servletResponse);
             return;
         }
+
+        String email = getEmail(httpServletRequest);
+        try {
+            if (isMaximumRequestsPerMinuteExceeded(email)) {
+                log.warn("LIMITE SOBREPASADO");
+                httpServletResponse.setStatus(HttpStatus.TOO_MANY_REQUESTS.value());
+                httpServletResponse.getWriter().write("TOO MANY REQUESTS");
+                return;
+            }
+        } catch (NullPointerException e) {
+            filterChain.doFilter(servletRequest, servletResponse);
+        }
+
         filterChain.doFilter(servletRequest, servletResponse);
     }
 

@@ -56,10 +56,4 @@ public class AuthController {
         return ResponseEntity.ok().build();
     }
 
-    @PostMapping("/refresh")
-    public ResponseEntity<JwtDto> refresh(@RequestBody JwtDto jwtDto) throws ParseException {
-        String token = TokenUtils.refreshToken(jwtDto);
-        JwtDto jwt = new JwtDto(token);
-        return new ResponseEntity<>(jwt, HttpStatus.OK);
-    }
 }

@@ -1,4 +1,4 @@
-FROM openjdk:17-jdk-alpine
+FROM openjdk:17-jdk
 COPY src /home/app/src
 COPY target /home/app/target
 COPY pom.xml /home/app
