@@ -23,7 +23,7 @@ import java.util.concurrent.TimeUnit;
 @Component
 public class RequestThrottleFilter implements Filter {
 
-    private int MAX_REQUESTS = 3;
+    private int MAX_REQUESTS = 5;
 
     private int DURATION = 1;
 
@@ -31,7 +31,7 @@ public class RequestThrottleFilter implements Filter {
 
     public RequestThrottleFilter() {
         super();
-        log.info("MAX REQUESTS" + MAX_REQUESTS + ", DURATION " + DURATION);
+        log.info("MAX REQUESTS " + MAX_REQUESTS + ", DURATION " + DURATION);
         requestCountsPerEmail = Caffeine.newBuilder().
                 expireAfterWrite(DURATION, TimeUnit.MINUTES).build(new CacheLoader<String, Integer>() {
                     public Integer load(String key) {

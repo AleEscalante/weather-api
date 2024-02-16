@@ -63,130 +63,136 @@ public class WeatherController {
 
     @GetMapping("/current-weather/{city}")
     public ResponseEntity<?> getWeather(@PathVariable("city") String city, HttpServletRequest request) {
-        LocationModel location = locationService.getLocation(city, apiKey);
         String keyCache = this.getKeyCache(QueryType.CURRENT_WEATHER, city);
-        if (location == null) {
-            Message message = new Message("City not found");
+        Record userQueryCache = this.loadCache(city, userCacheStore, QueryType.CURRENT_WEATHER);
+
+        if (userQueryCache != null) {
+            log.info("Query found in cache with key: " + keyCache);
             Consultation consultation = new Consultation(
                     this.getUser(this.getTokenFromRequest(request)),
                     new Timestamp(new Date().getTime()),
                     QueryType.CURRENT_WEATHER,
                     this.getUrl(QueryType.CURRENT_WEATHER, null, null),
-                    message.toString());
+                    userQueryCache.toString());
             consultationService.save(consultation);
-            return new ResponseEntity<>(message, HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(userQueryCache, HttpStatus.OK);
         } else {
-            Record userQueryCache = this.loadCache(city, userCacheStore, QueryType.CURRENT_WEATHER);
-            if (userQueryCache != null) {
-                log.info("Query found in cache with key: " + keyCache);
+            LocationModel location = locationService.getLocation(city, apiKey);
+            if (location == null) {
+                Message message = new Message("City not found");
                 Consultation consultation = new Consultation(
                         this.getUser(this.getTokenFromRequest(request)),
                         new Timestamp(new Date().getTime()),
                         QueryType.CURRENT_WEATHER,
                         this.getUrl(QueryType.CURRENT_WEATHER, null, null),
-                        userQueryCache.toString());
+                        message.toString());
                 consultationService.save(consultation);
-                return new ResponseEntity<>(userQueryCache, HttpStatus.OK);
+                return new ResponseEntity<>(message, HttpStatus.NOT_FOUND);
+            } else {
+                log.info("Query not found in cache");
+                WeatherInfoModel weatherInfoResponse = this.weatherInfoService.getWeatherCurrent(this.apiCurrentWeatherUrl,
+                        location.lat(), location.lon(), this.apiKey);
+                CustomWeatherResponseModel customResponse = this.weatherInfoService.transformToCustomWeatherResponse(weatherInfoResponse);
+                Consultation consultation = new Consultation(
+                        this.getUser(this.getTokenFromRequest(request)),
+                        new Timestamp(new Date().getTime()),
+                        QueryType.CURRENT_WEATHER,
+                        this.getUrl(QueryType.CURRENT_WEATHER, location.lat(), location.lon()),
+                        customResponse.toString());
+                consultationService.save(consultation);
+                userCacheStore.add(keyCache, customResponse);
+                return new ResponseEntity<>(customResponse, HttpStatus.OK);
             }
-            log.info("Query not found in cache");
-            WeatherInfoModel weatherInfoResponse = this.weatherInfoService.getWeatherCurrent(this.apiCurrentWeatherUrl,
-                    location.lat(), location.lon(), this.apiKey);
-            CustomWeatherResponseModel customResponse = this.weatherInfoService.transformToCustomWeatherResponse(weatherInfoResponse);
-            Consultation consultation = new Consultation(
-                    this.getUser(this.getTokenFromRequest(request)),
-                    new Timestamp(new Date().getTime()),
-                    QueryType.CURRENT_WEATHER,
-                    this.getUrl(QueryType.CURRENT_WEATHER, location.lat(), location.lon()),
-                    customResponse.toString());
-            consultationService.save(consultation);
-            userCacheStore.add(keyCache, customResponse);
-            return new ResponseEntity<>(customResponse, HttpStatus.OK);
         }
     }
 
     @GetMapping("/forecast/{city}")
     public ResponseEntity<?> getForecast(@PathVariable("city") String city, HttpServletRequest request) {
-        LocationModel location = locationService.getLocation(city, apiKey);
         String keyCache = this.getKeyCache(QueryType.FORECAST, city);
-        if (location == null) {
-            Message message = new Message("City not found");
+        Record userQueryCache = this.loadCache(city, userCacheStore, QueryType.FORECAST);
+
+        if (userQueryCache != null) {
+            log.info("Query found in cache with key: " + keyCache);
             Consultation consultation = new Consultation(
                     this.getUser(this.getTokenFromRequest(request)),
                     new Timestamp(new Date().getTime()),
                     QueryType.FORECAST,
                     this.getUrl(QueryType.FORECAST, null, null),
-                    message.toString());
+                    userQueryCache.toString());
             consultationService.save(consultation);
-            return new ResponseEntity<>(message, HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(userQueryCache, HttpStatus.OK);
         } else {
-            Record userQueryCache = this.loadCache(city, userCacheStore, QueryType.FORECAST);
-            if (userQueryCache != null) {
-                log.info("Query found in cache with key: " + keyCache);
+            LocationModel location = locationService.getLocation(city, apiKey);
+            if (location == null) {
+                Message message = new Message("City not found");
                 Consultation consultation = new Consultation(
                         this.getUser(this.getTokenFromRequest(request)),
                         new Timestamp(new Date().getTime()),
                         QueryType.FORECAST,
                         this.getUrl(QueryType.FORECAST, null, null),
-                        userQueryCache.toString());
+                        message.toString());
                 consultationService.save(consultation);
-                return new ResponseEntity<>(userQueryCache, HttpStatus.OK);
+                return new ResponseEntity<>(message, HttpStatus.NOT_FOUND);
+            } else {
+                log.info("Query not found in cache");
+                ForecastModel forecastInfoResponse = this.weatherInfoService.getForecast(this.apiForecastUrl,
+                        location.lat(), location.lon(), this.apiKey);
+                CustomForecastResponseModel customResponse = this.weatherInfoService.transformToCustomForecastResponse(forecastInfoResponse);
+                Consultation consultation = new Consultation(
+                        this.getUser(this.getTokenFromRequest(request)),
+                        new Timestamp(new Date().getTime()),
+                        QueryType.FORECAST,
+                        this.getUrl(QueryType.FORECAST, location.lat(), location.lon()),
+                        customResponse.toString());
+                consultationService.save(consultation);
+                userCacheStore.add(keyCache, customResponse);
+                return new ResponseEntity<>(customResponse, HttpStatus.OK);
             }
-            log.info("Query not found in cache");
-            ForecastModel forecastInfoResponse = this.weatherInfoService.getForecast(this.apiForecastUrl,
-                    location.lat(), location.lon(), this.apiKey);
-            CustomForecastResponseModel customResponse = this.weatherInfoService.transformToCustomForecastResponse(forecastInfoResponse);
-            Consultation consultation = new Consultation(
-                    this.getUser(this.getTokenFromRequest(request)),
-                    new Timestamp(new Date().getTime()),
-                    QueryType.FORECAST,
-                    this.getUrl(QueryType.FORECAST, location.lat(), location.lon()),
-                    customResponse.toString());
-            consultationService.save(consultation);
-            userCacheStore.add(keyCache, customResponse);
-            return new ResponseEntity<>(customResponse, HttpStatus.OK);
         }
     }
 
     @GetMapping("/air-pollution/{city}")
     public ResponseEntity<?> getAirPollution(@PathVariable("city") String city, HttpServletRequest request) {
-        LocationModel location = locationService.getLocation(city, apiKey);
         String keyCache = this.getKeyCache(QueryType.POLLUTION, city);
-        if (location == null) {
-            Message message = new Message("City not found");
+        Record userQueryCache = this.loadCache(city, userCacheStore, QueryType.POLLUTION);
+
+        if (userQueryCache != null) {
+            log.info("Query found in cache with key: " + keyCache);
             Consultation consultation = new Consultation(
                     this.getUser(this.getTokenFromRequest(request)),
                     new Timestamp(new Date().getTime()),
                     QueryType.POLLUTION,
                     this.getUrl(QueryType.POLLUTION, null, null),
-                    message.toString());
+                    userQueryCache.toString());
             consultationService.save(consultation);
-            return new ResponseEntity<>(message, HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(userQueryCache, HttpStatus.OK);
         } else {
-            Record userQueryCache = this.loadCache(city, userCacheStore, QueryType.POLLUTION);
-            if (userQueryCache != null) {
-                log.info("Query found in cache with key: " + keyCache);
+            LocationModel location = locationService.getLocation(city, apiKey);
+            if (location == null) {
+                Message message = new Message("City not found");
                 Consultation consultation = new Consultation(
                         this.getUser(this.getTokenFromRequest(request)),
                         new Timestamp(new Date().getTime()),
                         QueryType.POLLUTION,
                         this.getUrl(QueryType.POLLUTION, null, null),
-                        userQueryCache.toString());
+                        message.toString());
                 consultationService.save(consultation);
-                return new ResponseEntity<>(userQueryCache, HttpStatus.OK);
+                return new ResponseEntity<>(message, HttpStatus.NOT_FOUND);
+            } else {
+                log.info("Query not found in cache");
+                AirPollutionModel airPollutionResponse = this.weatherInfoService.getAirPollution(this.apiAirPollutionUrl,
+                        location.lat(), location.lon(), this.apiKey);
+                CustomPollutionInfoResponseModel customResponse = this.weatherInfoService.transformToCustomPollutionResponse(airPollutionResponse);
+                Consultation consultation = new Consultation(
+                        this.getUser(this.getTokenFromRequest(request)),
+                        new Timestamp(new Date().getTime()),
+                        QueryType.POLLUTION,
+                        this.getUrl(QueryType.POLLUTION, location.lat(), location.lon()),
+                        customResponse.toString());
+                consultationService.save(consultation);
+                userCacheStore.add(keyCache, customResponse);
+                return new ResponseEntity<>(customResponse, HttpStatus.OK);
             }
-            log.info("Query not found in cache");
-            AirPollutionModel airPollutionResponse = this.weatherInfoService.getAirPollution(this.apiAirPollutionUrl,
-                    location.lat(), location.lon(), this.apiKey);
-            CustomPollutionInfoResponseModel customResponse = this.weatherInfoService.transformToCustomPollutionResponse(airPollutionResponse);
-            Consultation consultation = new Consultation(
-                    this.getUser(this.getTokenFromRequest(request)),
-                    new Timestamp(new Date().getTime()),
-                    QueryType.POLLUTION,
-                    this.getUrl(QueryType.POLLUTION, location.lat(), location.lon()),
-                    customResponse.toString());
-            consultationService.save(consultation);
-            userCacheStore.add(keyCache, customResponse);
-            return new ResponseEntity<>(customResponse, HttpStatus.OK);
         }
     }
 
