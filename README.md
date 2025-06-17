@@ -36,7 +36,7 @@ endpoints.
 - http://localhost:8080/info/current-weather/sonsonate
 ![img.png](src/main/resources/static/img3.png)
 
-## Recomendacioens
+## Recomendaciones
 - Configurar las credenciales de acceso a la API de OpenWeatherMap.
 - Configurar la base de datos.
 - Añadir un usuario en la base de datos, este será el que permitirá realizar la autorización a las consultas.
